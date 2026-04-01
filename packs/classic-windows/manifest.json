@@ -1,0 +1,19 @@
+{
+  "id": "classic-windows",
+  "name": "Classic Windows",
+  "description": "The iconic Windows sounds you know and love. Nostalgic vibes from the golden era of Windows.",
+  "author": "WindowsDrip",
+  "price": "free",
+  "sounds": {
+    ".Default": "default.wav",
+    "SystemStart": "startup.wav",
+    "SystemExit": "shutdown.wav",
+    "SystemExclamation": "error.wav",
+    "Notification.Default": "notification.wav",
+    "SystemAsterisk": "info.wav",
+    "DeviceConnect": "connect.wav",
+    "DeviceDisconnect": "disconnect.wav",
+    "EmptyRecycleBin": "trash.wav",
+    "MailBeep": "mail.wav"
+  }
+}

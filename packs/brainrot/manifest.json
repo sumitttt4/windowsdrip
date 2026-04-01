@@ -1,0 +1,16 @@
+{
+  "id": "brainrot",
+  "name": "Brainrot Pack",
+  "description": "Skibidi error sounds fr fr. Your PC has never been more unhinged no cap.",
+  "author": "WindowsDrip",
+  "price": "free",
+  "sounds": {
+    ".Default": "default.wav",
+    "SystemStart": "startup.wav",
+    "SystemExclamation": "error.wav",
+    "Notification.Default": "notification.wav",
+    "DeviceConnect": "connect.wav",
+    "DeviceDisconnect": "disconnect.wav",
+    "EmptyRecycleBin": "trash.wav"
+  }
+}
