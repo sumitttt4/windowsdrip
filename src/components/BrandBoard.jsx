@@ -48,22 +48,65 @@ export default function BrandBoard({ pack, onClose }) {
 
   const brandName = pack.name.replace(/ Pack$/, '')
 
+  const generatePng = async () => {
+    if (!boardRef.current) return null
+    return toPng(boardRef.current, {
+      width: 1080,
+      height: 1350,
+      pixelRatio: 2,
+      backgroundColor: BRAND.dark,
+    })
+  }
+
+  const dataUrlToBlob = (dataUrl) => {
+    const [header, base64] = dataUrl.split(',')
+    const mime = header.match(/:(.*?);/)[1]
+    const bytes = atob(base64)
+    const arr = new Uint8Array(bytes.length)
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i)
+    return new Blob([arr], { type: mime })
+  }
+
   const handleDownload = async () => {
-    if (!boardRef.current) return
     setIsGenerating(true)
     try {
-      const dataUrl = await toPng(boardRef.current, {
-        width: 1080,
-        height: 1350,
-        pixelRatio: 2,
-        backgroundColor: BRAND.dark,
-      })
+      const dataUrl = await generatePng()
+      if (!dataUrl) return
       const link = document.createElement('a')
       link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-brand-board.png`
       link.href = dataUrl
       link.click()
     } catch (err) {
       console.error('Failed to generate brand board:', err)
+    }
+    setIsGenerating(false)
+  }
+
+  const handleShareToX = async () => {
+    setIsGenerating(true)
+    try {
+      const dataUrl = await generatePng()
+      if (!dataUrl) return
+      const blob = dataUrlToBlob(dataUrl)
+      const file = new File([blob], `${brandName}-brand-board.png`, { type: 'image/png' })
+
+      // Try Web Share API first (supports file sharing in modern browsers)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          text: `Check out the ${brandName} brand board — built in glyph.software`,
+          files: [file],
+        })
+      } else {
+        // Fallback: download the image + open X compose
+        const link = document.createElement('a')
+        link.download = `${brandName}-brand-board.png`
+        link.href = dataUrl
+        link.click()
+        const tweetText = encodeURIComponent(`Check out the ${brandName} brand board — built in glyph.software`)
+        window.open(`https://x.com/intent/tweet?text=${tweetText}`, '_blank')
+      }
+    } catch (err) {
+      console.error('Failed to share:', err)
     }
     setIsGenerating(false)
   }
@@ -351,40 +394,27 @@ export default function BrandBoard({ pack, onClose }) {
             </div>
           </div>
 
-          {/* Tote Bag Mockup */}
+          {/* T-Shirt Mockup */}
           <div style={{
             ...card(), flex: 1, background: BRAND.cardDark,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <div style={{ position: 'relative' }}>
-              {/* Bag handles */}
+              {/* T-shirt shape */}
+              <svg width="160" height="180" viewBox="0 0 160 180" fill="none">
+                {/* Sleeves + body */}
+                <path d="M40 0 L0 30 L15 45 L30 35 L30 170 C30 175 35 180 40 180 L120 180 C125 180 130 175 130 170 L130 35 L145 45 L160 30 L120 0 C115 15 95 25 80 25 C65 25 45 15 40 0Z"
+                  fill={BRAND.secondary} stroke={BRAND.cardBorder} strokeWidth="1"/>
+                {/* Collar */}
+                <path d="M40 0 C55 12 65 18 80 18 C95 18 105 12 120 0" fill="none" stroke={BRAND.cardBorder} strokeWidth="1.5"/>
+              </svg>
+              {/* Logo on shirt */}
               <div style={{
-                position: 'absolute', top: '-20px', left: '30px',
-                width: '40px', height: '28px',
-                borderTop: `4px solid ${BRAND.primary}`,
-                borderLeft: `4px solid ${BRAND.primary}`,
-                borderRight: `4px solid ${BRAND.primary}`,
-                borderRadius: '8px 8px 0 0',
-              }} />
-              <div style={{
-                position: 'absolute', top: '-20px', right: '30px',
-                width: '40px', height: '28px',
-                borderTop: `4px solid ${BRAND.primary}`,
-                borderLeft: `4px solid ${BRAND.primary}`,
-                borderRight: `4px solid ${BRAND.primary}`,
-                borderRadius: '8px 8px 0 0',
-              }} />
-              {/* Bag body */}
-              <div style={{
-                width: '160px', height: '170px',
-                background: BRAND.primary,
-                borderRadius: '4px 4px 16px 16px',
-                display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center', gap: '8px',
-                boxShadow: `0 12px 40px ${BRAND.primaryGlow}`,
+                position: 'absolute', top: '55px', left: '50%', transform: 'translateX(-50%)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
               }}>
-                <LogoMark size={44} color={BRAND.white} />
-                <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>{brandName}</div>
+                <LogoMark size={36} color={BRAND.primary} />
+                <div style={{ fontSize: '11px', fontWeight: 700, color: BRAND.primary }}>{brandName}</div>
               </div>
             </div>
           </div>
@@ -516,13 +546,25 @@ export default function BrandBoard({ pack, onClose }) {
             <div className="brand-board-modal__spec">1080 x 1350px</div>
             <div className="brand-board-modal__spec">PNG &bull; Instagram Portrait</div>
           </div>
-          <button
-            className="brand-board-modal__download"
-            onClick={handleDownload}
-            disabled={isGenerating}
-          >
-            {isGenerating ? 'Generating...' : 'Download PNG'}
-          </button>
+          <div className="brand-board-modal__buttons">
+            <button
+              className="brand-board-modal__download"
+              onClick={handleDownload}
+              disabled={isGenerating}
+            >
+              {isGenerating ? 'Generating...' : 'Download PNG'}
+            </button>
+            <button
+              className="brand-board-modal__share-x"
+              onClick={handleShareToX}
+              disabled={isGenerating}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              Share on X
+            </button>
+          </div>
         </div>
       </div>
     </>

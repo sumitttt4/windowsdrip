@@ -778,8 +778,13 @@ button {
   border-radius: 20px;
 }
 
+.brand-board-modal__buttons {
+  display: flex;
+  gap: 10px;
+}
+
 .brand-board-modal__download {
-  width: 100%;
+  flex: 1;
   padding: 14px;
   background: var(--accent);
   color: white;
@@ -795,6 +800,32 @@ button {
 }
 
 .brand-board-modal__download:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.brand-board-modal__share-x {
+  flex: 1;
+  padding: 14px;
+  background: #000;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.brand-board-modal__share-x:hover:not(:disabled) {
+  background: #1a1a1a;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.brand-board-modal__share-x:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
