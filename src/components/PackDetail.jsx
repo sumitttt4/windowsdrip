@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react'
+import BrandBoard from './BrandBoard'
 
 const SOUND_LABELS = {
   '.Default': { label: 'General Notification', icon: '🔔' },
@@ -20,6 +21,8 @@ const PACK_EMOJIS = {
 
 export default function PackDetail({ pack, isActive, isApplying, onApply, onBack }) {
   const [playingSound, setPlayingSound] = useState(null)
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const [showBrandBoard, setShowBrandBoard] = useState(false)
   const audioRef = useRef(null)
   const emoji = PACK_EMOJIS[pack.id] || '🔊'
 
@@ -58,6 +61,19 @@ export default function PackDetail({ pack, isActive, isApplying, onApply, onBack
     }
   }
 
+  // Close export menu when clicking outside
+  const exportRef = useRef(null)
+  React.useEffect(() => {
+    if (!showExportMenu) return
+    const handler = (e) => {
+      if (exportRef.current && !exportRef.current.contains(e.target)) {
+        setShowExportMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showExportMenu])
+
   return (
     <div className="pack-detail">
       <button className="pack-detail__back" onClick={onBack}>
@@ -75,13 +91,42 @@ export default function PackDetail({ pack, isActive, isApplying, onApply, onBack
             <span className="pack-detail__tag">{pack.price || 'free'}</span>
             {pack.author && <span className="pack-detail__tag">by {pack.author}</span>}
           </div>
-          <button
-            className={`pack-detail__apply ${isActive ? 'pack-detail__apply--active' : ''}`}
-            onClick={onApply}
-            disabled={isApplying || isActive}
-          >
-            {isApplying ? 'Applying...' : isActive ? '✓ Currently Active' : 'Apply Pack'}
-          </button>
+          <div className="pack-detail__actions">
+            <button
+              className={`pack-detail__apply ${isActive ? 'pack-detail__apply--active' : ''}`}
+              onClick={onApply}
+              disabled={isApplying || isActive}
+            >
+              {isApplying ? 'Applying...' : isActive ? '✓ Currently Active' : 'Apply Pack'}
+            </button>
+            <div className="export-dropdown" ref={exportRef}>
+              <button
+                className="export-dropdown__trigger"
+                onClick={() => setShowExportMenu(!showExportMenu)}
+              >
+                ↓ Export
+              </button>
+              {showExportMenu && (
+                <div className="export-dropdown__menu">
+                  <button className="export-dropdown__item" disabled>
+                    Social Media Kit
+                  </button>
+                  <button
+                    className="export-dropdown__item"
+                    onClick={() => {
+                      setShowBrandBoard(true)
+                      setShowExportMenu(false)
+                    }}
+                  >
+                    Brand Board
+                  </button>
+                  <button className="export-dropdown__item" disabled>
+                    React Component
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -108,6 +153,9 @@ export default function PackDetail({ pack, isActive, isApplying, onApply, onBack
           )
         })}
       </div>
+      {showBrandBoard && (
+        <BrandBoard pack={pack} onClose={() => setShowBrandBoard(false)} />
+      )}
     </div>
   )
 }
